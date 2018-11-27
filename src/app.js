@@ -27,6 +27,9 @@ var Config = require('./config')
 var Renderer = require('./app/ui/renderer')
 var Compiler = require('remix-solidity').Compiler
 var executionContext = require('./execution-context')
+
+var IconPanel = require('./app/panels/left-icon-panel')
+
 var FilePanel = require('./app/panels/file-panel')
 var EditorPanel = require('./app/panels/editor-panel')
 var RighthandPanel = require('./app/panels/righthand-panel')
@@ -74,7 +77,7 @@ var css = csjs`
     bottom             : 0;
     overflow           : hidden;
   }
-  .leftpanel           {
+  .iconpanel           {
     background-color  : ${styles.leftPanel.backgroundColor_Panel};
     display            : flex;
     flex-direction     : column;
@@ -82,6 +85,16 @@ var css = csjs`
     top                : 0;
     bottom             : 0;
     left               : 0;
+    overflow           : hidden;
+  }
+  .leftpanel           {
+    background-color  : ${styles.leftPanel.backgroundColor_Panel};
+    display            : flex;
+    flex-direction     : column;
+    position           : absolute;
+    top                : 0;
+    bottom             : 0;
+    left               : 50px;
     overflow           : hidden;
   }
   .rightpanel          {
@@ -201,6 +214,11 @@ class App {
   render () {
     var self = this
     if (self._view.el) return self._view.el
+    self._view.iconpanel = yo`
+      <div id="iconpanel" class=${css.iconpanel} style="width: 50px;">
+      ${''}
+      </div>
+    `
     self._view.leftpanel = yo`
       <div id="filepanel" class=${css.leftpanel}>
         ${''}
@@ -218,6 +236,7 @@ class App {
     `
     self._view.el = yo`
       <div class=${css.browsersolidity}>
+        ${self._view.iconpanel}
         ${self._view.leftpanel}
         ${self._view.centerpanel}
         ${self._view.rightpanel}
@@ -474,6 +493,12 @@ Please make a backup of your contracts and start using http://remix.ethereum.org
   if (filesToLoad !== null) {
     self.loadFiles(filesToLoad)
   }
+
+  // ---------------- lefthand-icon-column --------------------
+  self._components.iconCol = new IconPanel()
+  self._view.iconpanel.appendChild(self._components.iconCol.render())
+  // self._components.righthandpanel2.init()
+  // self._components.righthandpanel2.event.register('resize', delta => self._adjustLayout('right', delta))
 
   // ---------------- FilePanel --------------------
   self._components.filePanel = new FilePanel()
