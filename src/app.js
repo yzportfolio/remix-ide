@@ -94,8 +94,9 @@ var css = csjs`
     position           : absolute;
     top                : 0;
     bottom             : 0;
-    left               : 50px;
+    left               : 0;
     overflow           : hidden;
+    width              : 500px;
   }
   .rightpanel          {
     background-color  : ${styles.rightPanel.backgroundColor_Panel};
@@ -106,6 +107,7 @@ var css = csjs`
     right              : 0;
     bottom             : 0;
     overflow           : hidden;
+    
   }
   .highlightcode {
     position:absolute;
@@ -179,7 +181,7 @@ class App {
           show: true
         }, // @TODO: adapt sizes proportionally to browser window size
         left: {
-          offset: self._components.config.get('left-offset') || 200,
+          offset: self._components.config.get('left-offset') || 400,
           show: true
         }
       }
@@ -229,22 +231,16 @@ class App {
         ${''}
       </div>
     `
-    self._view.rightpanel = yo`
-      <div class=${css.rightpanel}>
-        ${''}
-      </div>
-    `
+
     self._view.el = yo`
       <div class=${css.browsersolidity}>
-        ${self._view.iconpanel}
         ${self._view.leftpanel}
         ${self._view.centerpanel}
-        ${self._view.rightpanel}
       </div>
     `
     // INIT
     self._adjustLayout('left', self.data._layout.left.offset)
-    self._adjustLayout('right', self.data._layout.right.offset)
+    // self._adjustLayout('right', self.data._layout.right.offset)
     return self._view.el
   }
   runCompiler () {
@@ -495,14 +491,14 @@ Please make a backup of your contracts and start using http://remix.ethereum.org
   }
 
   // ---------------- lefthand-icon-column --------------------
-  self._components.iconCol = new IconPanel()
-  self._view.iconpanel.appendChild(self._components.iconCol.render())
+  // self._components.iconCol = new IconPanel()
+  // self._view.iconpanel.appendChild(self._components.iconCol.render())
   // self._components.righthandpanel2.init()
   // self._components.righthandpanel2.event.register('resize', delta => self._adjustLayout('right', delta))
 
   // ---------------- FilePanel --------------------
   self._components.filePanel = new FilePanel()
-  self._view.leftpanel.appendChild(self._components.filePanel.render())
+  // self._view.leftpanel.appendChild(self._components.filePanel.render())
   self._components.filePanel.event.register('resize', delta => self._adjustLayout('left', delta))
   registry.put({api: self._components.filePanel, name: 'filepanel'})
 
@@ -512,7 +508,7 @@ Please make a backup of your contracts and start using http://remix.ethereum.org
 
   // ---------------- Righthand-panel --------------------
   self._components.righthandpanel = new RighthandPanel()
-  self._view.rightpanel.appendChild(self._components.righthandpanel.render())
+  self._view.leftpanel.appendChild(self._components.righthandpanel.render())
   self._components.righthandpanel.init()
   self._components.righthandpanel.event.register('resize', delta => self._adjustLayout('right', delta))
 

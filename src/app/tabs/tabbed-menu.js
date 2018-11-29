@@ -95,10 +95,13 @@ module.exports = class TabbedMenu {
 const css = csjs`
   .menu {
     display: flex;
+    flex-direction: column;
     background-color: ${styles.rightPanel.BackgroundColor_Pre};
     list-style: none;
     margin: 0;
     padding: 0;
+    width: 100px;
+    float: left;
   }
   .active {
     background-color: ${styles.rightPanel.backgroundColor_Tab};

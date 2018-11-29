@@ -35,6 +35,7 @@ module.exports = class RighthandPanel {
     }
 
     self._deps = {
+      filepanel: self._components.registry.get('filepanel').api,
       fileProviders: self._components.registry.get('fileproviders').api,
       fileManager: self._components.registry.get('filemanager').api,
       compiler: self._components.registry.get('compiler').api,
@@ -61,9 +62,18 @@ module.exports = class RighthandPanel {
 
     self._components.debuggerTab = new DebuggerTab(self._components.registry)
 
+    // #####
+      // ---------------- FilePanel --------------------
+  // self._components.filePanel = new FilePanel()
+  // self._view.leftpanel.appendChild(self._components.filePanel.render())
+  // self._components.filePanel.event.register('resize', delta => self._adjustLayout('left', delta))
+  // registry.put({api: self._components.filePanel, name: 'filepanel'})
+// #####
+
     self._components = {
       pluginManager: pluginManager,
       tabbedMenu: tabbedMenu,
+      filepanel: self._deps.filepanel,
       compile: new CompileTab(self._components.registry),
       run: new RunTab(self._components.registry),
       settings: new SettingsTab(self._components.registry),
@@ -97,7 +107,8 @@ module.exports = class RighthandPanel {
         </div>
       </div>`
 
-    const { compile, run, settings, analysis, debug, support, test } = self._components
+    const { filepanel, compile, run, settings, analysis, debug, support, test } = self._components
+    self._components.tabbedMenu.addTab('File Explorer', 'fileView', filepanel.render())
     self._components.tabbedMenu.addTab('Compile', 'compileView', compile.render())
     self._components.tabbedMenu.addTab('Run', 'runView', run.render())
     self._components.tabbedMenu.addTab('Analysis', 'staticanalysisView', analysis.render())

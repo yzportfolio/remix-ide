@@ -30,32 +30,27 @@ var css = require('./styles/file-panel-styles')
       - call fileProvider API
 */
 
-function lefticonpanel (localRegistry) {
-//   var self = this
-//   self._components = {}
-
-  function template () {
+module.exports = class LeftIconPanel {
+  constructor () {
+  }
+  render () {
     return yo`
-      <div class=${css.container}>
-        <ul>
-            <li>
-                <i style="size: 24px;" class="fa fa-files-o fa-2x">dd</i>
-            </li>
-            <li>
-                <i style="size: 24px;" class="fa fa-bug fa-2x"></i>
-            </li>
-            <li>
-                <i style="size: 24px;" class="fa fa-puzzle-piece fa-2x"></i>
-            </li>
-            <li>
-                <i style="size: 24px;" class="fa fa-cog fa-2x"></i>
-            </li>
-        </ul>
-      </div>
+    <div class=${css.container}>
+      <ul>
+        <li>
+          <i style="size: 24px;" class="fa fa-files-o fa-2x"></i>
+        </li>
+        <li>
+          <i style="size: 24px;" class="fa fa-bug fa-2x"></i>
+        </li>
+        <li>
+          <i style="size: 24px;" class="fa fa-puzzle-piece fa-2x"></i>
+        </li>
+        <li>
+          <i style="size: 24px;" class="fa fa-cog fa-2x"></i>
+        </li>
+      </ul>
+    </div>
     `
   }
-  var element = template()
-  self.render = function render () { return element }
 }
-
-module.exports = lefticonpanel
