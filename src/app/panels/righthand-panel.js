@@ -5,7 +5,6 @@ const remixLib = require('remix-lib')
 var globalRegistry = require('../../global/registry')
 
 const styleguide = require('../ui/styles-guide/theme-chooser')
-const PluginManager = require('../plugin/pluginManager')
 const TabbedMenu = require('../tabs/tabbed-menu')
 const CompileTab = require('../tabs/compile-tab')
 const SettingsTab = require('../tabs/settings-tab')
@@ -37,32 +36,20 @@ module.exports = class RighthandPanel {
     self._deps = {
       fileProviders: self._components.registry.get('fileproviders').api,
       fileManager: self._components.registry.get('filemanager').api,
-      compiler: self._components.registry.get('compiler').api,
+      compilerInternalModule: self._components.registry.get('compilerinternalmodule').api,
       udapp: self._components.registry.get('udapp').api,
       app: self._components.registry.get('app').api,
       txlistener: self._components.registry.get('txlistener').api
     }
 
     var tabbedMenu = new TabbedMenu(self._components.registry)
-
-    var pluginManager = new PluginManager(
-      self._deps.app,
-      self._deps.compiler,
-      self._deps.txlistener,
-      self._deps.fileProviders,
-      self._deps.fileManager,
-      self._deps.udapp
-    )
-
-    self._components.registry.put({api: pluginManager, name: 'pluginmanager'})
-
+    
     var analysisTab = new AnalysisTab(self._components.registry)
     analysisTab.event.register('newStaticAnaysisWarningMessage', (msg, settings) => { self._components.compile.addWarning(msg, settings) })
 
     self._components.debuggerTab = new DebuggerTab(self._components.registry)
 
     self._components = {
-      pluginManager: pluginManager,
       tabbedMenu: tabbedMenu,
       compile: new CompileTab(self._components.registry),
       run: new RunTab(self._components.registry),
@@ -71,20 +58,6 @@ module.exports = class RighthandPanel {
       debug: self._components.debuggerTab,
       support: new SupportTab(self._components.registry),
       test: new TestTab(self._components.registry)
-    }
-
-    self._components.settings.event.register('plugin-loadRequest', json => {
-      self.loadPlugin(json)
-    })
-
-    self.loadPlugin = function (json) {
-      var modal = new DraggableContent(() => {
-        self._components.pluginManager.unregister(json)
-      })
-      var tab = new PluginTab(json)
-      var content = tab.render()
-      document.querySelector('body').appendChild(modal.render(json.title, json.url, content))
-      self._components.pluginManager.register(json, modal, content)
     }
 
     self._view.dragbar = yo`<div id="dragbar" class=${css.dragbar}></div>`

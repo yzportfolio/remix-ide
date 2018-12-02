@@ -55,6 +55,16 @@ function UniversalDApp (opts, localRegistry) {
   self.resetEnvironment()
 }
 
+UniversalDApp.prototype.getPluginDescription = function () {
+  return {
+    title: 'udapp',
+    displayName: 'udapp',
+    icon: null,
+    methods: ['runTestTx', 'getAccounts', 'createVMAccount'],
+    notifications: []
+  }
+}
+
 UniversalDApp.prototype.resetEnvironment = function () {
   this.accounts = {}
   if (executionContext.isVM()) {
@@ -81,6 +91,7 @@ UniversalDApp.prototype.resetAPI = function (transactionContextAPI) {
 }
 
 UniversalDApp.prototype.createVMAccount = function (privateKey, balance, cb) {
+  if (executionContext.getProvider() !== 'vm') return cb('plugin API does not allow creating a new account through web3 connection. Only vm mode is allowed')
   this._addAccount(privateKey, balance)
   executionContext.vm().stateManager.cache.flush(function () {})
   privateKey = Buffer.from(privateKey, 'hex')
@@ -289,6 +300,33 @@ UniversalDApp.prototype.getInputs = function (funABI) {
     return ''
   }
   return txHelper.inputParametersDeclarationToString(funABI.inputs)
+}
+
+/**
+ * This function send a tx only to javascript VM or testnet, will return an error for the mainnet
+ * SHOULD BE TAKEN CAREFULLY!
+ *
+ * @param {Object} tx    - transaction.
+ * @param {Function} callback    - callback.
+ */
+UniversalDApp.prototype.runTestTx = function (tx, cb) {
+  executionContext.detectNetwork((error, network) => {
+    if (error) return cb(error)
+    if (network.name === 'Main' && network.id === '1') {
+      return cb('It is not allowed to make this action against mainnet')
+    }
+    udapp.silentRunTx(tx, (error, result) => {
+      if (error) return cb(error)
+      cb(null, {
+        transactionHash: result.transactionHash,
+        status: result.result.status,
+        gasUsed: '0x' + result.result.gasUsed.toString('hex'),
+        error: result.result.vm.exceptionError,
+        return: result.result.vm.return ? '0x' + result.result.vm.return.toString('hex') : '0x',
+        createdAddress: result.result.createdAddress ? '0x' + result.result.createdAddress.toString('hex') : undefined
+      })
+    })
+  })
 }
 
 /**

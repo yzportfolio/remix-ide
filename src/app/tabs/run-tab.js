@@ -309,6 +309,7 @@ function contractDropdown (events, self) {
     }
   }
 
+  // TODO sendCompilationResult is not handled anymore
   self._deps.pluginManager.event.register('sendCompilationResult', (file, source, languageVersion, data) => {
     // TODO check whether the tab is configured
     let compiler = new CompilerAbstract(languageVersion, data)

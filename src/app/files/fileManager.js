@@ -17,6 +17,7 @@ class FileManager {
     this.event = new EventManager()
     this._components = {}
     this._components.registry = localRegistry || globalRegistry
+    this.pluginKey = 'editor'
   }
 
   init () {
@@ -29,7 +30,8 @@ class FileManager {
       localhostExplorer: self._components.registry.get('fileproviders/localhost').api,
       configExplorer: self._components.registry.get('fileproviders/config').api,
       gistExplorer: self._components.registry.get('fileproviders/gist').api,
-      filesProviders: self._components.registry.get('fileproviders').api
+      filesProviders: self._components.registry.get('fileproviders').api,
+      moduleManager: self._components.registry.get('modulemanager').api
     }
 
     self._deps.browserExplorer.event.register('fileRenamed', (oldName, newName, isFolder) => { this.fileRenamedEvent(oldName, newName, isFolder) })
@@ -42,6 +44,25 @@ class FileManager {
     self._deps.gistExplorer.event.register('fileRemoved', (path) => { this.fileRemovedEvent(path) })
     self._deps.localhostExplorer.event.register('errored', (event) => { this.removeTabsOf(self._deps.localhostExplorer) })
     self._deps.localhostExplorer.event.register('closed', (event) => { this.removeTabsOf(self._deps.localhostExplorer) })
+
+    self.event.register('currentFileChanged', (file, provider) => {
+      moduleManager.broadcast({
+        action: 'notification',
+        key: this.pluginKey,
+        type: 'currentFileChanged',
+        value: [ file ]
+      })
+    })
+  }
+
+  pluginDescription () {
+    return {
+      title: 'fileManager',
+      displayName: 'fileManager',
+      icon: null,
+      methods: ['getFilesFromPath', 'getCurrentFile', 'getFile', 'setFile'],
+      notifications: []
+    }
   }
 
   fileRenamedEvent (oldName, newName, isFolder) {
@@ -84,6 +105,41 @@ class FileManager {
   currentFile () {
     var self = this
     return self._deps.config.get('currentFile')
+  }
+
+  getCurrentFile (cb) {
+    var path = this.currentFile()
+    if (!path) {
+      cb('no file selected')
+    } else {
+      cb(null, path)
+    }
+  }
+
+  getFile (path, cb) {
+    var provider = this.fileProviderOf(path)
+    if (provider) {
+      // TODO add approval to user for external plugin to get the content of the given `path`
+      provider.get(path, (error, content) => {
+        cb(error, content)
+      })
+    } else {
+      cb(path + ' not available')
+    }
+  }
+
+  setFile (path, content, cb) {
+    var provider = this.fileProviderOf(path)
+    if (provider) {
+      // TODO add approval to user for external plugin to set the content of the given `path`
+      provider.set(path, content, (error) => {
+        if (error) return cb(error)
+        this.syncEditor(path)
+        cb()
+      })
+    } else {
+      cb(path + ' not available')
+    }
   }
 
   currentPath () {

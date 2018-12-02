@@ -41,6 +41,7 @@ var BasicReadOnlyExplorer = require('./app/files/basicReadOnlyExplorer')
 var NotPersistedExplorer = require('./app/files/NotPersistedExplorer')
 var toolTip = require('./app/ui/tooltip')
 var TransactionReceiptResolver = require('./transactionReceiptResolver')
+var { ModuleManager, IframeService, InternalModule } = require('remix-plugin')
 
 var styleGuide = require('./app/ui/styles-guide/theme-chooser')
 var styles = styleGuide.chooser()
@@ -113,6 +114,9 @@ class App {
     this.event = new EventManager()
     self._components = {}
     registry.put({api: self, name: 'app'})
+
+    self._components.moduleManager = new ModuleManager()
+    registry.put({api: self._components.moduleManager, name: 'modulemanager'})
 
     var fileStorage = new Storage('sol:')
     registry.put({api: fileStorage, name: 'fileStorage'})
@@ -348,6 +352,44 @@ class App {
       self.importExternal(url, filecb)
     }
   }
+
+  pluginDescription () {
+    return {
+      title: 'app',
+      displayName: 'app',
+      icon: null,
+      methods: ['getExecutionContextProvider', 'getProviderEndpoint', 'detectNetWork', 'addProvider', 'removeProvider'],
+      notifications: []
+    }
+  }
+
+  getExecutionContextProvider (cb) {
+    cb(null, executionContext.getProvider())
+  }
+
+  getProviderEndpoint (cb) {
+    if (executionContext.getProvider() === 'web3') {
+      cb(null, executionContext.web3().currentProvider.host)
+    } else {
+      cb('no endpoint: current provider is either injected or vm')
+    }
+  }
+
+  detectNetWork (cb) {
+    executionContext.detectNetwork((error, network) {
+      cb(error, network)
+    })
+  }
+
+  addProvider (name, url, cb) {
+    executionContext.addProvider({ name, url })
+    cb()
+  }
+
+  removeProvider (name, cb) {
+    executionContext.removeProvider(name)
+    cb()
+  }
 }
 
 module.exports = App
@@ -391,6 +433,22 @@ Please make a backup of your contracts and start using http://remix.ethereum.org
   // ----------------- Compiler -----------------
   self._components.compiler = new Compiler((url, cb) => self.importFileCb(url, cb))
   registry.put({api: self._components.compiler, name: 'compiler'})
+
+  var compilerInternalModule = {
+    getCompilationResult: (cb) => {
+      cb(null, compiler.lastCompilationResult)
+    },
+    pluginDescription: () => {
+      return {
+        title: 'compiler',
+        displayName: 'compiler',
+        icon: null,
+        methods: ['getCompilationResult'],
+        notifications: []
+      }
+    }
+  }
+  registry.put({api: compilerInternalModule, name: 'compilerinternalmodule'})
 
   var offsetToLineColumnConverter = new OffsetToLineColumnConverter(self._components.compiler.event)
   registry.put({api: offsetToLineColumnConverter, name: 'offsettolinecolumnconverter'})
@@ -474,6 +532,47 @@ Please make a backup of your contracts and start using http://remix.ethereum.org
   if (filesToLoad !== null) {
     self.loadFiles(filesToLoad)
   }
+
+  /************************************************************
+   *
+   * This handles internal plugins
+   * 
+   */
+  let iframeService = new IframeService(moduleManager)
+          
+  let appModule = new InternalModule(self.pluginDescription(), moduleManager, self)
+
+  // TODO check if config inner function is verify `mod`
+  // TODO make proxies
+  // TODO make promises
+
+  let configProvider = self._components.filesProviders['config']
+  let configModule = new InternalModule(configProvider.pluginDescription(), moduleManager, configProvider)
+
+  let compilerModule = new InternalModule(compilerInternalModule.pluginDescription(), moduleManager, compilerInternalModule)
+  let udappModule = new InternalModule(udapp.pluginDescription(), moduleManager, udapp)
+  let fileManagerModule = new InternalModule(fileManager.pluginDescription(), moduleManager, fileManager)
+  let highlighter = new InternalModule(editor.variouSourceHighlighter.pluginDescription(), moduleManager, variouSourceHighlighter)
+  
+  // TODO Those are Remix module, The registration could not be put back there
+  compiler.event.register('compilationFinished', (success, data, source) => {
+    moduleManager.broadcast({
+      action: 'notification',
+      key: 'compiler',
+      type: 'compilationFinished',
+      value: [ success, data, source ]
+    })
+  })
+
+  txlistener.event.register('newTransaction', (tx) => {
+    moduleManager.broadcast({
+      action: 'notification',
+      key: 'txlistener',
+      type: 'newTransaction',
+      value: [tx]
+    })
+  })
+  /************************************************************/
 
   // ---------------- FilePanel --------------------
   self._components.filePanel = new FilePanel()
