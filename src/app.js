@@ -15,6 +15,7 @@ var UniversalDAppUI = require('./universal-dapp-ui.js')
 var Remixd = require('./lib/remixd')
 var OffsetToLineColumnConverter = require('./lib/offsetToLineColumnConverter')
 
+// const PluginManager = require('./plugin/pluginManager')
 var QueryParams = require('./lib/query-params')
 var GistHandler = require('./lib/gist-handler')
 var helper = require('./lib/helper')
@@ -87,16 +88,16 @@ var css = csjs`
     left               : 0;
     overflow           : hidden;
   }
-  .leftpanel           {
+  .swappanel           {
     background-color  : ${styles.leftPanel.backgroundColor_Panel};
     display            : flex;
     flex-direction     : column;
     position           : absolute;
     top                : 0;
     bottom             : 0;
-    left               : 0;
+    left               : 50px;
     overflow           : hidden;
-    width              : 500px;
+    width              : 200px;
   }
   .rightpanel          {
     background-color  : ${styles.rightPanel.backgroundColor_Panel};
@@ -119,6 +120,8 @@ var css = csjs`
     z-index:20;
     background-color: ${styles.editor.backgroundColor_DebuggerMode};
     opacity: 0.5;
+  }
+  .swappanel {
   }
 `
 
@@ -177,11 +180,11 @@ class App {
     self.data = {
       _layout: {
         right: {
-          offset: self._components.config.get('right-offset') || 400,
+          offset: self._components.config.get('right-offset') || 100,
           show: true
         }, // @TODO: adapt sizes proportionally to browser window size
         left: {
-          offset: self._components.config.get('left-offset') || 400,
+          offset: self._components.config.get('left-offset') || 250,
           show: true
         }
       }
@@ -201,7 +204,7 @@ class App {
       }
     }
     if (direction === 'left') {
-      self._view.leftpanel.style.width = delta + 'px'
+      self._view.swappanel.style.width = delta + 'px'
       self._view.centerpanel.style.left = delta + 'px'
     }
     if (direction === 'right') {
@@ -217,12 +220,12 @@ class App {
     var self = this
     if (self._view.el) return self._view.el
     self._view.iconpanel = yo`
-      <div id="iconpanel" class=${css.iconpanel} style="width: 50px;">
+      <div id="icon-panel" class=${css.iconpanel} style="width: 50px;">
       ${''}
       </div>
     `
-    self._view.leftpanel = yo`
-      <div id="filepanel" class=${css.leftpanel}>
+    self._view.swappanel = yo`
+      <div id="swap-panel" class=${css.swappanel}>
         ${''}
       </div>
     `
@@ -234,7 +237,8 @@ class App {
 
     self._view.el = yo`
       <div class=${css.browsersolidity}>
-        ${self._view.leftpanel}
+        ${self._view.iconpanel}
+        ${self._view.swappanel}
         ${self._view.centerpanel}
       </div>
     `
@@ -490,15 +494,9 @@ Please make a backup of your contracts and start using http://remix.ethereum.org
     self.loadFiles(filesToLoad)
   }
 
-  // ---------------- lefthand-icon-column --------------------
-  // self._components.iconCol = new IconPanel()
-  // self._view.iconpanel.appendChild(self._components.iconCol.render())
-  // self._components.righthandpanel2.init()
-  // self._components.righthandpanel2.event.register('resize', delta => self._adjustLayout('right', delta))
-
-  // ---------------- FilePanel --------------------
+  // ---------------- SwapPanel --------------------
   self._components.filePanel = new FilePanel()
-  // self._view.leftpanel.appendChild(self._components.filePanel.render())
+  self._view.swappanel.appendChild(self._components.filePanel.render())
   self._components.filePanel.event.register('resize', delta => self._adjustLayout('left', delta))
   registry.put({api: self._components.filePanel, name: 'filepanel'})
 
@@ -507,10 +505,26 @@ Please make a backup of your contracts and start using http://remix.ethereum.org
   registry.put({api: renderer, name: 'renderer'})
 
   // ---------------- Righthand-panel --------------------
-  self._components.righthandpanel = new RighthandPanel()
-  self._view.leftpanel.appendChild(self._components.righthandpanel.render())
-  self._components.righthandpanel.init()
-  self._components.righthandpanel.event.register('resize', delta => self._adjustLayout('right', delta))
+  // self._components.righthandpanel = new RighthandPanel()
+  // self._view.swappanel.appendChild(self._components.righthandpanel.render())
+  // self._components.righthandpanel.init()
+  // self._components.righthandpanel.event.register('resize', delta => self._adjustLayout('right', delta))
+
+  // var pluginManager = new PluginManager(
+  //   self._deps.app,
+  //   self._deps.compiler,
+  //   self._deps.txlistener,
+  //   self._deps.fileProviders,
+  //   self._deps.fileManager,
+  //   self._deps.udapp
+  // )
+
+  // ---------------- left-icon-panel --------------------
+  self._components.iconPanel = new IconPanel()
+  self._view.iconpanel.appendChild(self._components.iconPanel.render())
+  // self._components.iconPanel.init()
+  // self._components.iconPanel.event.register('resize', delta => self._adjustLayout('left', delta))
+  // registry.put({api: self._components.iconPanel, name: 'iconpanel'})
 
   var txLogger = new TxLogger() // eslint-disable-line  
 
