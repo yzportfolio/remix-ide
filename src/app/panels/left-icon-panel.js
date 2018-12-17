@@ -155,7 +155,6 @@ module.exports = class LeftIconPanel {
   // }
 
   swapPlugin (name) {
-    // console.log the plugin that was clicked
     console.log(name)
   }
 
@@ -268,5 +267,12 @@ const css = csjs`
   }
   i.plugin            {
     cursor            : pointer;
+  }
+  .container ul {
+    margin-top        : 10px;
+  }
+  .container ul li {
+    text-align        : center;
+    margin-top        : 10px;
   }
 `

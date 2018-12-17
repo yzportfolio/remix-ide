@@ -31,9 +31,10 @@ var executionContext = require('./execution-context')
 
 var IconPanel = require('./app/panels/left-icon-panel')
 
-var FilePanel = require('./app/panels/file-panel')
+// var FilePanel = require('./app/panels/file-panel')
+var SwapPanel = require('./app/panels/swap-panel')
 var EditorPanel = require('./app/panels/editor-panel')
-var RighthandPanel = require('./app/panels/righthand-panel')
+// var RighthandPanel = require('./app/panels/righthand-panel')
 var examples = require('./app/editor/example-contracts')
 var modalDialogCustom = require('./app/ui/modal-dialog-custom')
 var TxLogger = require('./app/execution/txLogger')
@@ -495,10 +496,35 @@ Please make a backup of your contracts and start using http://remix.ethereum.org
   }
 
   // ---------------- SwapPanel --------------------
-  self._components.filePanel = new FilePanel()
-  self._view.swappanel.appendChild(self._components.filePanel.render())
-  self._components.filePanel.event.register('resize', delta => self._adjustLayout('left', delta))
-  registry.put({api: self._components.filePanel, name: 'filepanel'})
+  // so now app will load an array and this array dictate which components to stick into a stack of divs
+  // and the components are loaded into a div that is "roughed in" on line ~ 230
+  // but it should make all this stuff for the "roughed" individual composnents in a loop
+
+  self.swapPanelPlugins = [
+    {type: 'fileManager', displayName: 'File Manger', icon: 'fa fa-files-o fa-2x', iFrame: false},
+    {type: 'pluginManager', displayName: 'Plugin Manger', icon: 'fa fa-puzzle-piece fa-2x', iFrame: false},
+    {type: 'settings', displayName: 'Setting', icon: 'fa fa-cog fa-2x', iFrame: false}
+  ]
+  // it needs a function that will make the component to attach to the swap panel
+  //
+  // self._components.filePanel = new FilePanel()
+  // this one had been just the filePanel - but now its an array of divs
+  // so it needs to new filepanel, new pluinManager, new settingsManager
+  // does this happen in swapPanel and not here?
+
+  // probably
+
+  // and when it is just loading an iFrame - what does it need to do?
+  //
+  // so there are 2 steps - adding the component to the _compenets object and giving it a name
+  // then appendChild to the swap panel
+
+  // there is some business about the event.register(resize) - but that is a bit irrelevent for now
+  self._components.swapPanel = new SwapPanel()
+  self._view.swappanel.appendChild(self._components.swapPanel.render())
+
+  self._components.swapPanel.event.register('resize', delta => self._adjustLayout('left', delta))
+  registry.put({api: self._components.filePanel, name: 'swappanel'})
 
   // ----------------- Renderer -----------------
   var renderer = new Renderer()
