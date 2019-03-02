@@ -115,7 +115,6 @@ class FileManager {
   async getCurrentFile () {
     const path = this.currentFile()
     if (!path) throw new Error('no file selected')
-    console.log('Get current File', path)
     return path
   }
 
