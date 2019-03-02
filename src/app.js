@@ -363,7 +363,7 @@ Please make a backup of your contracts and start using http://remix.ethereum.org
     that proxy is used by appManager to broadcast new transaction event
   */
   const txListenerModuleProxy = {
-    event: new EventEmitter(),
+    events: new EventEmitter(),
     profile () {
       return {
         name: 'txListener',
@@ -374,7 +374,7 @@ Please make a backup of your contracts and start using http://remix.ethereum.org
     }
   }
   txlistener.event.register('newTransaction', (tx) => {
-    txListenerModuleProxy.event.emit('newTransaction', tx)
+    txListenerModuleProxy.events.emit('newTransaction', tx)
   })
 
   txlistener.startListening()
