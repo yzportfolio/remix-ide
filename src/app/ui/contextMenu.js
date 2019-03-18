@@ -14,7 +14,6 @@ var css = csjs`
         background: ${styles.appProperties.solidBorderBox_BackgroundColor};
         border-radius: 2px;
         z-index: 1000;
-        background-color: var(--light)
     }
     
     .liitem
