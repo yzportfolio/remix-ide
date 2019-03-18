@@ -66,8 +66,6 @@ var css = csjs`
     cursor: pointer;
   }
   .modalFooterOk:hover {
-    background-color: var(--dark);
-    color: var(--light);
     cursor: pointer;
     color: ${styles.remix.modalDialog_Header_Footer_Color};
   }
@@ -78,8 +76,6 @@ var css = csjs`
     cursor: pointer;
   }
   .modalFooterCancel:hover {
-    background-color: var(--dark);
-    color: var(--light);
     margin-left: 1em;
     cursor: pointer;
     color: ${styles.remix.modalDialog_Header_Footer_Color};

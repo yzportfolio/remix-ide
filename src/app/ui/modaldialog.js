@@ -39,17 +39,11 @@ module.exports = (title, content, ok, cancel, focusSelector, opts) => {
     var okDiv = document.getElementById('modal-footer-ok')
     var cancelDiv = document.getElementById('modal-footer-cancel')
     if (btn === 'ok') {
-      agreed = true
-      okDiv.style.backgroundColor = 'var(--dark)'
-      okDiv.style.color = 'var(--light)'
-      cancelDiv.style.backgroundColor = 'var(--light)'
-      cancelDiv.style.color = 'var(--dark)'
+      okDiv.className = okDiv.className.replace(/\bbtn-light\b/g, 'btn-dark')
+      cancelDiv.className = cancelDiv.className.replace(/\bbtn-dark\b/g, 'btn-light')
     } else {
-      agreed = false
-      okDiv.style.backgroundColor = 'var(--light)'
-      okDiv.style.color = 'var(--dark)'
-      cancelDiv.style.backgroundColor = 'var(--dark)'
-      cancelDiv.style.color = 'var(--light)'
+      cancelDiv.className = cancelDiv.className.replace(/\bbtn-light\b/g, 'btn-dark')
+      okDiv.className = okDiv.className.replace(/\bbtn-dark\b/g, 'btn-light')
     }
   }
 
@@ -73,9 +67,11 @@ module.exports = (title, content, ok, cancel, focusSelector, opts) => {
       okListener()
     } else if (e.keyCode === 37) {
       e.preventDefault()
+      agreed = true
       setFocusOn('ok')
     } else if (e.keyCode === 39) {
       e.preventDefault()
+      agreed = false
       setFocusOn('cancel')
     }
   }
@@ -122,9 +118,10 @@ function html () {
       <div class="${css['modalBody']}"> -
       </div>
       <div class="${css['modalFooter']}">
-        <span id="modal-footer-ok" class="${css['modalFooterOk']} btn btn-sm btn-dark autofocus tabindex='1'">OK</span>
-        <span id="modal-footer-cancel" class="${css['modalFooterCancel']} btn btn-sm btn-light tabindex='0'">Cancel</span>
+        <span id="modal-footer-ok" class="${css['modalFooterOk']} btn btn-sm btn-light">OK</span>
+        <span id="modal-footer-cancel" class="${css['modalFooterCancel']} btn btn-sm btn-light">Cancel</span>
       </div>
     </div>
   </div>`
 }
+
