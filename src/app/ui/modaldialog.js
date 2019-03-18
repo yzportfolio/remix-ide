@@ -1,13 +1,9 @@
 var yo = require('yo-yo')
 var css = require('./styles/modaldialog-styles')
 
-<<<<<<< HEAD
-module.exports = (title, content, ok, cancel, focusSelector) => {
-=======
 module.exports = (title, content, ok, cancel, focusSelector, opts) => {
   let agreed = true
   opts = opts || {}
->>>>>>> 863b9543... added key-navigation to modaldialog
   var container = document.querySelector(`.${css.modal}`)
   if (!container) {
     document.querySelector('body').appendChild(html())
